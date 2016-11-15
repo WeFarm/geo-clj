@@ -2,18 +2,26 @@
   (:require [clj-http.client :as client])
   (:require [clojure.data.json :as json]))
 
-;; should this be here ???
-(def url "https://maps.googleapis.com/maps/api/geocode/json")
 
-;; todo - remove url from here
-(defn geocode [address]
-  "Uses google geocode api to geocode address. Returns lat / lng."
-  (let [apikey (System/getenv "GOOGLE_APIKEY")]
-        (:location
-          (:geometry 
-            (first 
-              (:results 
-                (json/read-str
-                  (:body
-                    (client/get url
-                                {:query-params {"key" apikey "address" address}})) :key-fn keyword)))))))
+(defn geocode 
+  ([address] (geocode address nil))
+  ([address region]
+   "Uses google geocode api to geocode address. Returns lat / lng."
+   (let [apikey (System/getenv "GOOGLE_APIKEY")
+         url "https://maps.googleapis.com/maps/api/geocode/json"
+         params (if (nil? region)
+                  {"key" apikey "address" address}
+                  {"key" apikey "address" address "region" region})]
+
+     (if (nil? apikey)
+       (println "Unable to read environment variable `GOOGLE_APIKEY`. Please make sure it is set and try again.")
+       (-> url
+           (client/get {:query-params params})
+           (:body)
+           (json/read-str :key-fn keyword)
+           (:results)
+           (first)
+           (:geometry)
+           (:location))))))
+
+

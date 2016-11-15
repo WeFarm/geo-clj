@@ -4,6 +4,8 @@ clojure geocode library
 
 ## Usage
 
+Make sure you have set the environment variable `GOOGLE_APIKEY` 
+
 ### geocode an address:
 (geo-clj.google/geocode "123 main street Fairhaven MA 02719")
 
